@@ -17,20 +17,20 @@ def get_num_kv_heads():
     return num_kv_heads
 
 
-def get_shard_size(total_size, mp_size, rank=None):
+def get_shard_size(total_size, mp_size, name=None, rank=None):
     global num_kv_heads
     # When we have num_kv_heads defined, uneven division is possible, otherwise enforce near even division
     if rank == None:
         rank = dist.get_rank()
-    if num_kv_heads != None and total_size % num_kv_heads == 0:
+    if num_kv_heads != None and total_size % num_kv_heads == 0 and "mlp" not in str(name):
         my_slices = (num_kv_heads // mp_size) + (1 if rank < (num_kv_heads % mp_size) else 0)
         return total_size * my_slices // num_kv_heads
     else:
         return total_size // mp_size + (1 if rank < (total_size % mp_size) else 0)
 
 
-def get_shard_size_list(total_size, mp_size):
+def get_shard_size_list(total_size, mp_size, name=None):
     shard_sizes = []
     for i in range(mp_size):
-        shard_sizes.append(get_shard_size(total_size, mp_size, i))
+        shard_sizes.append(get_shard_size(total_size, mp_size, name, i))
     return shard_sizes
