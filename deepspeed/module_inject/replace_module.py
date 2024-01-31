@@ -299,13 +299,6 @@ def replace_transformer_layer(orig_layer_impl, model, checkpoint_dict, config, m
         # 6. Set linear policies
         _autotp.update_linear_policies()
 
-<<<<<<< HEAD
-        # 7. Replace modules
-        if "lm_head" in all_reduce_linears or "embed_out" in all_reduce_linears:
-            return _autotp._replace_last_linear_module(module)
-=======
-        # 4. Replace modules
->>>>>>> parent of 6763e2de (add lm_head and embed_out tensor parallel (#3962))
         return _autotp._replace_module(module)
 
     def replace_fn(child, _policy, layer_id=0, prefix="", state_dict=None):
@@ -335,19 +328,6 @@ def replace_transformer_layer(orig_layer_impl, model, checkpoint_dict, config, m
         if embedding_weight is not None and hasattr(module, "lm_head") and hasattr(
                 module.lm_head, "weight") and module.lm_head.weight.is_meta:
             module.lm_head.weight = embedding_weight
-<<<<<<< HEAD
-        # enable tensor parallel for the last linear
-        if hasattr(module, "lm_head") and hasattr(module.lm_head,
-                                                  "weight") and not module.lm_head.weight.is_meta and isinstance(
-                                                      module.lm_head, torch.nn.Linear):
-            module = replace_wo_policy(module, ("lm_head", ), 0, "lm_head")
-        elif hasattr(module, "embed_out") and hasattr(module.embed_out,
-                                                      "weight") and not module.embed_out.weight.is_meta and isinstance(
-                                                          module.embed_out, torch.nn.Linear):
-            module = replace_wo_policy(module, ("embed_out", ), 0, "embed_out")
-        return module
-=======
->>>>>>> parent of 6763e2de (add lm_head and embed_out tensor parallel (#3962))
 
     if checkpoint_dict is not None and not config.replace_with_kernel_inject:
         # AutoTP shard loading
@@ -362,10 +342,8 @@ def replace_transformer_layer(orig_layer_impl, model, checkpoint_dict, config, m
                                              checkpoint=checkpoint_file)
             pbar.update(1)
             gc.collect()
-<<<<<<< HEAD
-=======
+
         set_lm_head(replaced_module)
->>>>>>> parent of 6763e2de (add lm_head and embed_out tensor parallel (#3962))
     else:
         replaced_module = replace_module(model=model,
                                          orig_class=orig_layer_impl,
